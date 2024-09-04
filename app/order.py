@@ -4,6 +4,7 @@ from flask import (
 from app.db import get_db
 from app.auth import login_required
 from app.models import Order  # Import the Order class
+from app.event import publish_message, connect_kafka_producer
 
 bp = Blueprint('orders', __name__, url_prefix='/orders')
 
@@ -19,13 +20,20 @@ def create_order():
         error = 'Order body is required.'
 
     if error is None:
+        # db
         db.execute(
             "INSERT INTO orders (user_id, body) VALUES (?, ?)",
             (g.user['id'], body),
         )
         db.commit()
         order_id = db.execute('SELECT last_insert_rowid()').fetchone()[0]
+
         order = Order(order_id, g.user['id'], body)
+
+        # kafka
+        producer = connect_kafka_producer()
+        publish_message(producer, "orders", order.to_dict())
+
         return jsonify({"message": "Order created successfully", "order": order.to_dict()}), 201
 
     return jsonify({"error": error}), 400

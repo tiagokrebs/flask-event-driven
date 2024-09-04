@@ -1,10 +1,11 @@
 from kafka import KafkaProducer
+import json
 
-def publish_message(producer_instance, topic_name, key, value):
+def publish_message(producer_instance, topic_name, value=None):
     try:
-        producer_instance.send(topic_name, key=key, value=value)
+        value_bytes = json.dumps(value).encode('utf-8')
+        producer_instance.send(topic=topic_name, value=value_bytes)
         producer_instance.flush()
-        print('Message published successfully.')
     except Exception as ex:
         print('Error publishing message.')
         print(str(ex))
@@ -16,4 +17,5 @@ def connect_kafka_producer():
     except Exception as ex:
         print('Error while connecting Kafka producer.')
         print(str(ex))
+    return _producer
         

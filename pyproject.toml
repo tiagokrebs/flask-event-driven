@@ -1,0 +1,18 @@
+[project]
+name = "app"
+version = "0.1.0"
+description = "Basic event driven app."
+dependencies = [
+    "flask",
+]
+
+[build-system]
+requires = ["flit_core<4"]
+build-backend = "flit_core.buildapi"
+# make tests less verbose please
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["app"]
